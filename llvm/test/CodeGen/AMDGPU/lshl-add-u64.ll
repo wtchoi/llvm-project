@@ -196,10 +196,9 @@ define amdgpu_kernel void @lshl_add_u64_s2v(i64 %v) {
 ; GFX1250-GISEL-NEXT:    global_prefetch_b8 v0, s[64:65] scope:SCOPE_SE
 ; GFX1250-GISEL-NEXT:    flat_load_b64 v[0:1], v[0:1]
 ; GFX1250-GISEL-NEXT:    s_load_b64 s[0:1], s[4:5], 0x24 nv
-; GFX1250-GISEL-NEXT:    s_wait_kmcnt 0x0
-; GFX1250-GISEL-NEXT:    s_lshl_b64 s[0:1], s[0:1], 2
 ; GFX1250-GISEL-NEXT:    s_wait_loadcnt_dscnt 0x0
-; GFX1250-GISEL-NEXT:    v_add_nc_u64_e32 v[2:3], s[0:1], v[0:1]
+; GFX1250-GISEL-NEXT:    s_wait_kmcnt 0x0
+; GFX1250-GISEL-NEXT:    v_lshl_add_u64 v[2:3], s[0:1], 2, v[0:1]
 ; GFX1250-GISEL-NEXT:    flat_store_b64 v[0:1], v[2:3]
 ; GFX1250-GISEL-NEXT:    s_endpgm
   %a = load i64, ptr poison
@@ -908,13 +907,12 @@ define amdgpu_ps <2 x i32> @lshl_add_u64_svs_and_4(i32 inreg %v, i64 %a, i32 inr
 ; GFX1250-GISEL-NEXT:    s_mov_b64 s[64:65], 0
 ; GFX1250-GISEL-NEXT:    v_nop
 ; GFX1250-GISEL-NEXT:    global_prefetch_b8 v0, s[64:65] scope:SCOPE_SE
-; GFX1250-GISEL-NEXT:    s_and_b32 s0, s1, 4
-; GFX1250-GISEL-NEXT:    s_mov_b32 s1, 0
-; GFX1250-GISEL-NEXT:    s_delay_alu instid0(SALU_CYCLE_1) | instskip(NEXT) | instid1(SALU_CYCLE_1)
-; GFX1250-GISEL-NEXT:    s_lshl_b64 s[0:1], s[0:1], s0
-; GFX1250-GISEL-NEXT:    v_add_nc_u64_e32 v[0:1], s[0:1], v[0:1]
-; GFX1250-GISEL-NEXT:    s_delay_alu instid0(VALU_DEP_1) | instskip(NEXT) | instid1(VALU_DEP_2)
+; GFX1250-GISEL-NEXT:    s_mov_b32 s3, 0
+; GFX1250-GISEL-NEXT:    s_and_b32 s2, s1, 4
+; GFX1250-GISEL-NEXT:    s_delay_alu instid0(SALU_CYCLE_1) | instskip(NEXT) | instid1(VALU_DEP_1)
+; GFX1250-GISEL-NEXT:    v_lshl_add_u64 v[0:1], s[2:3], s2, v[0:1]
 ; GFX1250-GISEL-NEXT:    v_readfirstlane_b32 s0, v0
+; GFX1250-GISEL-NEXT:    s_delay_alu instid0(VALU_DEP_2)
 ; GFX1250-GISEL-NEXT:    v_readfirstlane_b32 s1, v1
 ; GFX1250-GISEL-NEXT:    ; return to shader part epilog
   %and = and i32 %s, 4
